@@ -1,35 +1,5 @@
-patientID = load('./patientID.mat').patientID;
-patientIDWithTumor = load('./posID.mat').caseID;
-numPatients = length(patientID);
-numPatientsWithTumor = length(patientIDWithTumor);
-%%This outer for loop organize data into an array of struct. 
-%Each struct represent a patient.
-for i = 1:numPatients
-    path = append('./100_original_anonymized_images_ExportedMatlab/',patientID(i,:),'/');
-    patients(i).adc = load(append(path,'ADC_',patientID(i,:),'.mat')).ADC;
-    patients(i).cdi = load(append(path,'CDI_matlab_',patientID(i,:),'.mat')).CDI_matlab;
-    patients(i).pMask = logical(load(append(path,'PMask0_',patientID(i,:),'.mat')).Mask0);%convert mask into logical array
-    patients(i).tumors = struct('lesion',{},'gleasonScore',{});
-    patients(i).numTumor = 0;
-    patients(i).patientID = patientID(i,:);
-    patients(i).tumorCombined = logical(zeros(size(patients(i).pMask)));
-    lesionFilePath = append(path,'Lesion_',patientID(i,:),'.mat');
-    if isfile(lesionFilePath)%if there is tumor, fill in the tumor struct
-        lesionData = load(lesionFilePath).Lesion;
-        lesionInfoPath = append(path,'Lesion_info_',patientID(i,:),'.mat');
-        lesionInfo = load(lesionInfoPath).Lesion_info;
-        patients(i).numTumor = length(lesionInfo);
-        for numTumors = 1:patients(i).numTumor
-           patients(i).tumors(numTumors).gleasonScore = lesionInfo(numTumors);
-           patients(i).tumors(numTumors).lesion = logical(lesionData{numTumors});
-           %currently two classes: GS >=6 vs  GS = 0.
-           %need to add more finer classification. i.e. GS = 6 vs GS < 6
-           %and GS >= 7 vs GS = 0 
-        end
-        patients(i).tumorCombined = getCombinedCancerMask(patients(i));
-    end
-end
-
+[patients, ~] = getPatientData();
+%%
 adcCancerPixels = [];
 adcNonCancerPixels = [];
 cdiCancerPixels = [];
