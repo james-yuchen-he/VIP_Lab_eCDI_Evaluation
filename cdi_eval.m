@@ -1,5 +1,5 @@
-[patients, ~] = getPatientData();
-%%
+%NOTE: This file must be placed at the immediate parent directory of /100_original_anonymized_images_ExportedMatlab
+[patients, numPatients, ~] = getPatientData();
 adcCancerPixels = [];
 adcNonCancerPixels = [];
 cdiCancerPixels = [];
@@ -8,7 +8,7 @@ for i = 1:(numPatients - 1)
     if patients(i).numTumor ~= 0
         cancerPixelsTmp = getCancerPixels(patients(i),'adc');
         adcCancerPixels = vertcat(adcCancerPixels, cancerPixelsTmp);
-        cancerPixelsTmp = getCancerPixels(patients(i),'cdi')
+        cancerPixelsTmp = getCancerPixels(patients(i),'cdi');
         cdiCancerPixels = vertcat(cdiCancerPixels,cancerPixelsTmp);
     end
     nonCancerPixelsTmp = getNonCancerPixels(patients(i),'adc');
@@ -45,10 +45,10 @@ histogram(cdiCancerPixels,20)
 
 [~, threshold] = min(abs(yCancerADC./yNonCancerADC-1));
 [~, threshold] = min(abs(yCancerADC./yNonCancerADC-1));
-truePositiveADC = patients(numPatients).adc((patients(numPatients).adc < threshold & patients(numPatients).pMask == 1) &  patients(numPatients).tumorCombined == 1);
-falsePositiveADC = patients(numPatients).adc((patients(numPatients).adc < threshold & patients(numPatients).pMask == 1) &  patients(numPatients).tumorCombined == 0);
-trueNegativeADC = patients(numPatients).adc((patients(numPatients).adc > threshold & patients(numPatients).pMask == 1) &  patients(numPatients).tumorCombined == 0);
-falseNegativeADC = patients(numPatients).adc((patients(numPatients).adc > threshold & patients(numPatients).pMask == 1) &  patients(numPatients).tumorCombined == 1);
+truePositiveADC = patients(numPatients).adc((patients(numPatients).adc < threshold & patients(numPatients).pMask == 1) &  getCombinedCancerMask(patients(numPatients)) == 1);
+falsePositiveADC = patients(numPatients).adc((patients(numPatients).adc < threshold & patients(numPatients).pMask == 1) & getCombinedCancerMask(patients(numPatients)) == 0);
+trueNegativeADC = patients(numPatients).adc((patients(numPatients).adc > threshold & patients(numPatients).pMask == 1) &  getCombinedCancerMask(patients(numPatients)) == 0);
+falseNegativeADC = patients(numPatients).adc((patients(numPatients).adc > threshold & patients(numPatients).pMask == 1) & getCombinedCancerMask(patients(numPatients)) == 1);
 
 ntruePositiveADC = length(truePositiveADC);
 nfalsePositiveADC = length(falsePositiveADC);

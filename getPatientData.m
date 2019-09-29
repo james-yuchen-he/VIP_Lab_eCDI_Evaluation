@@ -1,6 +1,27 @@
-function [patients,numPatientsWithTumor] = getPatientData()
-%GETPATIENTDATA Summary of this function goes here
-%   Detailed explanation goes here
+function [patients,numPatients,numPatientsWithTumor] = getPatientData()
+%GETPATIENTDATA Read the data from the stray .mat files and storeit in an
+%array of struct, with each struct containing representing a patient
+%e.g.
+%>> patients = 
+% 
+%   1×104 struct array with fields:
+% 
+%     adc
+%     cdi
+%     pMask
+%     numTumor
+%     patientID
+%     tumors
+
+% >> patients(3).tumors
+% 
+% ans = 
+% 
+%   1×2 struct array with fields:
+% 
+%     gleasonScore
+%     lesion
+
     patientID = load('./patientID.mat').patientID;
     patientIDWithTumor = load('./posID.mat').caseID;
     numPatients = length(patientID);
@@ -12,7 +33,6 @@ function [patients,numPatientsWithTumor] = getPatientData()
         patients(i).adc = load(append(path,'ADC_',patientID(i,:),'.mat')).ADC;
         patients(i).cdi = load(append(path,'CDI_matlab_',patientID(i,:),'.mat')).CDI_matlab;
         patients(i).pMask = logical(load(append(path,'PMask0_',patientID(i,:),'.mat')).Mask0);%convert mask into logical array
-        %patients(i).tumors = struct('lesion',{},'gleasonScore',{});
         patients(i).numTumor = 0;
         patients(i).patientID = patientID(i,:);
         lesionFilePath = append(path,'Lesion_',patientID(i,:),'.mat');
