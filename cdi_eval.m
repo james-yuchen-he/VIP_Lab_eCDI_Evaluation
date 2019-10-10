@@ -19,6 +19,7 @@ end
 
 x = [1: 2000];
 
+%%
 paramEstCancerADC = mle(adcCancerPixels);% compute the mean and std through mle
 paramEstNonCancerADC = mle(adcNonCancerPixels);
 yCancerADC = normpdf(x,paramEstCancerADC(1),paramEstCancerADC(2));
@@ -43,6 +44,55 @@ histogram(cdiNonCancerPixels,20)
 figure(3);
 histogram(cdiCancerPixels,20)
 
+%%
+% Do for both cdiNonCancerPixels and cdiCancerPixels
+% Do for both fine and coarse alpha searches
+
+figure(1);
+start_ = -1;
+end_ = 1;
+a = start_ : (end_-start_)/8 : end_;
+
+for i = 1:9
+    subplot(3,3,i)
+    histogram(powfun(cdiNonCancerPixels,a(i)),200)
+    title("alpha = "+num2str(a(i)))
+end
+
+sgtitle('CDI Non Cancer Transformed Distributions')
+
+%%
+% Do for both cdiNonCancerPixels and cdiCancerPixels
+
+figure(2);
+histogram(powfun(cdiNonCancerPixels,0),200)
+title('Log Transform')
+
+%%
+figure(3);
+sgtitle("Log Transforms")
+
+subplot(2,2,1)
+histogram(powfun(cdiNonCancerPixels,0),200)
+title('CDI Non Cancer')
+
+subplot(2,2,2)
+histogram(powfun(cdiNonCancerPixels,0),200)
+hold on
+histogram(powfun(cdiCancerPixels,0),200)
+title('Not Normalized')
+
+subplot(2,2,3)
+histogram(powfun(cdiCancerPixels,0),200,'FaceColor',[0.8500, 0.3250, 0.0980])
+title('CDI Cancer')
+
+subplot(2,2,4)
+histogram(powfun(cdiNonCancerPixels,0),200,'Normalization','pdf')
+hold on
+histogram(powfun(cdiCancerPixels,0),200,'Normalization','pdf')
+title('Normalized (PDF)')
+
+%%
 [~, threshold] = min(abs(yCancerADC./yNonCancerADC-1));
 [~, threshold] = min(abs(yCancerADC./yNonCancerADC-1));
 truePositiveADC = patients(numPatients).adc((patients(numPatients).adc < threshold & patients(numPatients).pMask == 1) &  getCombinedCancerMask(patients(numPatients)) == 1);
