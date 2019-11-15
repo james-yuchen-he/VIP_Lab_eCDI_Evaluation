@@ -100,7 +100,7 @@ cdi_confusion_matrix_sum = np.zeros(shape=(2,2))
 kf = KFold(n_splits=5, shuffle=False)
 
 for num, (patients_train_index, patients_test_index) in enumerate(kf.split(patients)):
-    print(f'Trial {num}:')
+    print(f'Trial {num}: training sample size:{len(patients_train_index)} test sample size:{len(patients_test_index)}')
     adc_threshold, cdi_threshold = train(patients[patients_train_index])
     adc_confusion_matrix, cdi_confusion_matrix = evaluate(patients[patients_test_index],adc_threshold, cdi_threshold)
     adc_confusion_matrix_sum += adc_confusion_matrix
