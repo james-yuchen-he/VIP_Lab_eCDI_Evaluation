@@ -97,9 +97,3 @@ def getCombinedCancerMask(patient):
         for i in range(patient["numTumor"]):
             cancerMask[np.logical_or(cancerMask == 1,patient["tumors"]["lesion"][i] == 1)] = 1
         return cancerMask
-    
-
-
-# %%
-
-

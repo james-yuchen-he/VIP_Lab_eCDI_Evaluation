@@ -65,9 +65,19 @@ def train(training_set=None):
 
     adc_threshold = x_adc[np.argmin(np.abs(y_adc_cancer / y_adc_non_cancer -1))]
     cdi_threshold = math.exp(x_cdi[np.argmin(np.abs(y_cdi_cancer / y_cdi_non_cancer -1))])
-    print(f'ADC Decision boundary: Cancer: x < {adc_threshold} Non-Cancer: x > {adc_threshold}')
-    print(f'CDI Decision boundary: Cancer: x > {cdi_threshold} Non-Cancer: x < {cdi_threshold}')
-
+    # print(f'ADC Decision boundary: Cancer: x < {adc_threshold} Non-Cancer: x > {adc_threshold}')
+    # print(f'CDI Decision boundary: Cancer: x > {cdi_threshold} Non-Cancer: x < {cdi_threshold}')
+    # plt.figure()
+    # plt.subplot(121)
+    # plt.plot(x_adc, y_adc_cancer,label="adc_cancer")
+    # plt.plot(x_adc, y_adc_non_cancer, label="adc_non_cancer")
+    # plt.subplot(122)
+    # plt.plot(x_cdi, y_cdi_cancer, label="cdi_cancer")
+    # plt.plot(x_cdi, y_cdi_non_cancer, label="cdi_non_cancer")
+    # plt.legend()
+    # plt.show()
+    # input("press any key to continue")
+    # plt.close()
     return adc_threshold, cdi_threshold
 
 
@@ -87,7 +97,40 @@ def evaluate(test_set, adc_threshold, cdi_threshold):
         cdi_prediction[np.logical_and(patient["pMask"] == True, patient["cdi"] < cdi_threshold)] = False
         cdi_prediction[patient["pMask"] == False] = False
         cdi_cm += confusion_matrix(getCombinedCancerMask(patient)[patient["pMask"] == True].flatten(), cdi_prediction[patient["pMask"] == True].flatten())
-        
+
+        # plot_logic = input("plot? y/n")
+        # if plot_logic == 'y':
+        #     print(np.where(getCombinedCancerMask(patient) == True))
+        #     slice_num = input("slice number?")
+        #     try:
+        #         slice_num = int(slice_num)
+        #         plt.figure(f'patient {patient["patientID"]} slice {slice_num}')
+        #         plt.subplot(231)
+        #         plt.imshow(getCombinedCancerMask(patient)[:,:,slice_num])
+        #         plt.title("combined cancer mask")
+        #         plt.subplot(232)
+        #         plt.imshow(patient["adc"][:,:,slice_num])
+        #         plt.title("adc")
+        #         plt.subplot(233)
+        #         plt.imshow(patient["cdi"][:,:,slice_num])
+        #         plt.title("cdi")
+        #         plt.subplot(234)
+        #         plt.imshow(patient["pMask"][:,:,slice_num])
+        #         plt.title("pMask")
+        #         plt.subplot(235)
+        #         plt.imshow(adc_prediction[:,:,slice_num])
+        #         plt.title("adc_prediction")
+        #         plt.subplot(236)
+        #         plt.imshow(cdi_prediction[:,:,slice_num])
+        #         plt.title("cdi_prediction")
+        #         plt.show()
+        #     except ValueError:
+        #         print("invalid slice number")
+        #         continue
+        # else:
+        #     continue
+            
+            
     return adc_cm, cdi_cm
 
 
