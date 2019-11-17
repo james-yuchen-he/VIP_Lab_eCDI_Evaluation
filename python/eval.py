@@ -20,6 +20,7 @@ def train(training_set=None):
     adcNonCancerPixels, cdiNonCancerPixels = np.array([]), np.array([])
 
     for patient in training_set:
+        
         if patient["numTumor"] != 0:
             cancerPixelsTmp = getCancerPixels(patient,"adc",True)
             adcCancerPixels = np.append(adcCancerPixels, cancerPixelsTmp)
@@ -47,37 +48,42 @@ def train(training_set=None):
     y_adc_cancer     = dist.pdf(x_adc,    mu_adc_cancer,    std_adc_cancer)
     y_adc_non_cancer = dist.pdf(x_adc,mu_adc_non_cancer,std_adc_non_cancer)
 
-    mu_cdi_cancer,     std_cdi_cancer     = dist.fit(np.log(cdiCancerPixels[cdiCancerPixels>0]))
-    mu_cdi_non_cancer, std_cdi_non_cancer = dist.fit(np.log(cdiNonCancerPixels[cdiNonCancerPixels>0]))
+    dist_exp = scipy.stats.expon
+    fig, (ax1, ax2) = plt.subplots(1,2)
+    ax1.hist(cdiCancerPixels, bins = 20)
+    ax2.hist(cdiNonCancerPixels, bins = 20)
+    fig.show()
+    _ , mu_cdi_cancer = dist_exp.fit(cdiCancerPixels, loc = 0, scale = 1)
+    _ , mu_cdi_non_cancer = dist_exp.fit(cdiNonCancerPixels)
+    print(f'mu_cdi_cancer = {mu_cdi_cancer} mu_cdi_non_cancer = {mu_cdi_non_cancer}')
+    # x_cdi_cancer_lower_bound = mu_cdi_cancer    -4*std_cdi_cancer
+    # x_cdi_cancer_upper_bound = mu_cdi_cancer    +4*std_cdi_cancer
+    # x_cdi_non_cancer_lower_bound = mu_cdi_non_cancer - 4*std_cdi_non_cancer
+    # x_cdi_non_cancer_upper_bound = mu_cdi_non_cancer + 4*std_cdi_non_cancer
 
-    x_cdi_cancer_lower_bound = mu_cdi_cancer    -4*std_cdi_cancer
-    x_cdi_cancer_upper_bound = mu_cdi_cancer    +4*std_cdi_cancer
-    x_cdi_non_cancer_lower_bound = mu_cdi_non_cancer - 4*std_cdi_non_cancer
-    x_cdi_non_cancer_upper_bound = mu_cdi_non_cancer + 4*std_cdi_non_cancer
+    # x_cdi_lower_bound = x_cdi_cancer_lower_bound if x_cdi_cancer_lower_bound < x_cdi_non_cancer_lower_bound else x_cdi_non_cancer_lower_bound
+    # x_cdi_upper_bound = x_cdi_cancer_upper_bound if x_cdi_cancer_upper_bound > x_cdi_non_cancer_upper_bound else x_cdi_non_cancer_upper_bound
 
-    x_cdi_lower_bound = x_cdi_cancer_lower_bound if x_cdi_cancer_lower_bound < x_cdi_non_cancer_lower_bound else x_cdi_non_cancer_lower_bound
-    x_cdi_upper_bound = x_cdi_cancer_upper_bound if x_cdi_cancer_upper_bound > x_cdi_non_cancer_upper_bound else x_cdi_non_cancer_upper_bound
+    x_cdi     = np.linspace(0,20, 200)
 
-    x_cdi     = np.linspace(x_cdi_lower_bound, x_cdi_upper_bound, 200)
-
-    y_cdi_cancer     = dist.pdf(x_cdi,    mu_cdi_cancer,    std_cdi_cancer)
-    y_cdi_non_cancer = dist.pdf(x_cdi,mu_cdi_non_cancer,std_cdi_non_cancer)
+    y_cdi_cancer     = dist_exp.pdf(x_cdi, scale = mu_cdi_cancer)
+    y_cdi_non_cancer = dist_exp.pdf(x_cdi, scale = mu_cdi_non_cancer)
 
     adc_threshold = x_adc[np.argmin(np.abs(y_adc_cancer / y_adc_non_cancer -1))]
-    cdi_threshold = math.exp(x_cdi[np.argmin(np.abs(y_cdi_cancer / y_cdi_non_cancer -1))])
-    # print(f'ADC Decision boundary: Cancer: x < {adc_threshold} Non-Cancer: x > {adc_threshold}')
-    # print(f'CDI Decision boundary: Cancer: x > {cdi_threshold} Non-Cancer: x < {cdi_threshold}')
-    # plt.figure()
-    # plt.subplot(121)
-    # plt.plot(x_adc, y_adc_cancer,label="adc_cancer")
-    # plt.plot(x_adc, y_adc_non_cancer, label="adc_non_cancer")
-    # plt.subplot(122)
-    # plt.plot(x_cdi, y_cdi_cancer, label="cdi_cancer")
-    # plt.plot(x_cdi, y_cdi_non_cancer, label="cdi_non_cancer")
-    # plt.legend()
-    # plt.show()
-    # input("press any key to continue")
-    # plt.close()
+    cdi_threshold = math.log(mu_cdi_cancer / mu_cdi_non_cancer) / (mu_cdi_cancer - mu_cdi_non_cancer)
+    print(f'ADC Decision boundary: Cancer: x < {adc_threshold} Non-Cancer: x > {adc_threshold}')
+    print(f'CDI Decision boundary: Cancer: x > {cdi_threshold} Non-Cancer: x < {cdi_threshold}')
+    plt.figure()
+    plt.subplot(121)
+    plt.plot(x_adc, y_adc_cancer,label="adc_cancer")
+    plt.plot(x_adc, y_adc_non_cancer, label="adc_non_cancer")
+    plt.subplot(122)
+    plt.plot(x_cdi, y_cdi_cancer, label="cdi_cancer")
+    plt.plot(x_cdi, y_cdi_non_cancer, label="cdi_non_cancer")
+    plt.legend()
+    plt.show()
+    input("press any key to continue")
+    plt.close()
     return adc_threshold, cdi_threshold
 
 
