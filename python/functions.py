@@ -93,7 +93,9 @@ def getCombinedCancerMask(patient):
     if patient['numTumor'] == 0:
         return np.zeros(np.shape(patient['pMask']))
     else:
-        cancerMask = patient["tumors"]["lesion"][0]
+        cancerMask = np.zeros(np.shape(patient['pMask']), dtype=bool)
         for i in range(patient["numTumor"]):
+            if patient["tumors"]["gleasonScore"][i] < 7:
+                continue
             cancerMask[np.logical_or(cancerMask == 1,patient["tumors"]["lesion"][i] == 1)] = 1
-        return cancerMask
+    return cancerMask
